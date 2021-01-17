@@ -1,4 +1,4 @@
-*Vagrantfile*
+# *Vagrantfile*
 .terraform
 terraform.tfstate
 *.tfstate*
@@ -6,7 +6,7 @@ terraform.tfvars
 .vars
 .vagrant
 .terraform
-*grpn-fkalamidas-id_rsa.pub*
+*id_rsa.pub*
 *.DS_Store*
 
 # Installer logs
