@@ -1,0 +1,136 @@
+# {{ ansible_managed }}
+# Local modifications will be overwritten.
+[client]
+socket                = /tmp/mysql.sock
+
+[mysql]
+character-sets-dir    = /usr/local/share/percona-server/charsets/
+default-character-set = utf8
+socket                = /tmp/mysql.sock
+# log client commands to syslog
+syslog
+
+[mysqladmin]
+character-sets-dir    = /usr/local/share/percona-server/charsets/
+default-character-set = utf8
+socket                = /tmp/mysql.sock
+
+[mysqldump]
+character-sets-dir    = /usr/local/share/percona-server/charsets/
+default-character-set = utf8
+max_allowed_packet    = 32M
+quick
+routines
+socket                = /tmp/mysql.sock
+
+
+[mysqld]
+socket                          = /tmp/mysql.sock
+basedir                         = /usr/local
+binlog_format                   = ROW
+character-set-server            = utf8
+datadir                         = /var/percona/mysql/mysql-data
+event_scheduler                 = OFF
+lc-messages                     = en_US
+lc-messages-dir                 = /usr/share/percona-server
+log-error                       = /var/percona/mysql/mysql.err
+net_buffer_length               = 64K
+pid-file                        = /var/percona/mysql/mysql.pid
+port                            = 3306
+
+
+{% if 'main' in group_names %}
+read-only                       = 0
+{% endif %}
+
+{% if 'replica' in group_names %}
+read-only                       = 1
+{% endif %}
+
+skip-name-resolve
+slave_compressed_protocol	= 0
+tmpdir                          = /var/percona/mysql/tmp
+transaction-isolation           = REPEATABLE-READ
+user                            = mysql
+default-time-zone   = SYSTEM
+explicit_defaults_for_timestamp = ON
+
+
+##########
+# Replication options
+##########
+log-bin-index                   = /var/percona/mysql/master-bin.index
+log-bin                         = /var/percona/mysql/master-bin
+log-slave-updates               = 1
+relay-log-index                 = /var/percona/mysql/slave-relay-bin.index
+relay-log                       = /var/percona/mysql/slave-relay-bin
+server-id                       = {{ replication_server_id }}
+master_info_repository          = TABLE
+relay_log_info_repository       = TABLE
+relay_log_recovery              = 1
+
+##########
+# Logging options
+##########
+# See http://www.mysqlperformanceblog.com/2009/02/10/impact-of-logging-on-mysql%E2%80%99s-performance/
+long_query_time                   = 2.0
+log_slow_verbosity                = microtime # full,microtime,innodb,query_plan,profiling,profiling_use_getrusage
+log_slow_slave_statements         = 1
+# Note documentation bug -- log_slow_rate_limit cannot be 0; 1 means log everything
+log_slow_rate_limit               = 1
+log_slow_rate_type                = session
+slow_query_log                    = 1
+slow_query_log_file             = /var/percona/mysql/slow_query.log
+long_query_time                 = 2.000000
+slow_query_log_use_global_control = long_query_time,log_slow_filter,log_slow_rate_limit,log_slow_verbosity
+userstat                          = 1
+
+##########
+# Memory-limited configuration
+##########
+join_buffer_size                = 128K
+max_allowed_packet              = 32M
+max_connections                 = 8000
+max_user_connections            = 7990
+max_heap_table_size             = 64M
+query_cache_size                = 0
+query_cache_type                = 0
+read_buffer_size                = 128K
+read_rnd_buffer_size            = 256K
+sort_buffer_size                = 2M
+table_open_cache_instances      = 16
+table_open_cache                = 8192
+tmp_table_size                  = 64M
+
+##########
+# Thread pool configuration
+##########
+
+thread_handling                 = pool-of-threads
+
+
+#########
+# InnoDB configuration
+#########
+innodb_buffer_pool_load_at_startup = 1
+innodb_buffer_pool_dump_at_shutdown = 1
+innodb_buffer_pool_instances    = 8
+innodb_buffer_pool_size         = {{ innodb_buffer_pool_size }}
+innodb_data_file_path           = ibdata1:20M:autoextend
+innodb_fast_shutdown            = 1
+innodb_file_per_table           = 1
+innodb_flush_log_at_trx_commit  = 2
+innodb_flush_method             = O_DIRECT
+innodb_flush_neighbors          = 1
+innodb_force_recovery           = 0     # only change in emergencies
+innodb_change_buffer_max_size   = 10M
+innodb_io_capacity              = 200
+innodb_io_capacity_max          = 2000
+innodb_lru_scan_depth           = 1024
+innodb_lock_wait_timeout        = 20
+innodb_log_buffer_size          = 8M
+innodb_log_files_in_group       = 2
+innodb_log_file_size            = 1G
+innodb_max_dirty_pages_pct      = 50
+innodb_random_read_ahead        = 0
+innodb_thread_concurrency       = 48

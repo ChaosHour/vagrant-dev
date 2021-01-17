@@ -1,0 +1,67 @@
+---
+#
+# pre-install.yml - Playbook to add some things before the main install.
+#
+
+  - name: install updates
+    yum:
+      name: '*'
+      state: latest 
+    ignore_errors: yes    
+  
+  - name: Ensure the timezone is set to utc 
+    file: 
+      src: /usr/share/zoneinfo/UTC
+      dest: /etc/localtime
+      state: link
+
+  - name: Install selinux support
+    yum: 
+      name: "{{ item }}"
+    with_items:
+        - libselinux-python
+        - policycoreutils-python  
+
+  - name: disalbe selinux
+    selinux: state=disabled
+    ignore_errors: yes
+
+  - name: disable current session selinux
+    command: 
+      setenforce 0
+    ignore_errors: yes        
+
+#  - name: install the MySQL Percona rpm from a remote repo
+#    yum:
+#      name:
+#        https://repo.percona.com/percona/yum/percona-release-1.0-25.noarch.rpm
+#      update_cache: yes
+#      state: present
+  
+#  - name: install remote epel repo for CentOS 7 -- Needed to install xtrabackup
+#    yum:
+#      name: https://dl.fedoraproject.org/pub/epel/epel-release-latest-7.noarch.rpm
+#      state: present
+
+  - name: System, set the swappiness to one
+    sysctl:
+        name: vm.swappiness
+        value: "1"
+        state: present
+        reload: false
+
+  - name: Synchronization using rsync 
+    synchronize:
+      src: files/packages_depends
+      dest: "{{ backup_dir }}"
+    tags: soft1
+  
+  - name: Install Percona 5.7 rpm files
+    shell: yum localinstall *.rpm -y
+    args:
+      chdir: "{{ package_dir }}"
+ 
+  - name: Sleep for 20 seconds and continue with play
+    wait_for:
+      timeout: 20
+    #delegate_to: localhost

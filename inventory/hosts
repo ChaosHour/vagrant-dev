@@ -1,0 +1,14 @@
+[vagrant_dev]
+dev1 ansible_host=10.8.0.38 
+dev2 ansible_host=10.8.0.39
+
+[main]
+dev1 ansible_host=10.8.0.38
+
+[replica]
+dev2 ansible_host=10.8.0.39
+
+
+[vagrant_dev:children]
+main
+replica

@@ -1,0 +1,53 @@
+---
+
+# Set Vars For your mysql config file - my.cnf
+replication_server_id: "{% set j2l1 = ansible_all_ipv4_addresses[0].split('.') %} {% set j2l2 = j2l1[1:] | join() %} {% print(j2l2)  %}"
+max_connections: "{% if ansible_memtotal_mb >= 129015 %}5500{% else %}2000{% endif %}"
+innodb_buffer_pool_size:  "{{ (ansible_memtotal_mb * 70/100) | round|int }}M"
+#innodb_buffer_pool_size: "{{ (ansible_memtotal_mb * 0.6) | int }}M"
+#innodb_thread_concurrency: "{{(ansible_processor_count * 4)|int }}"
+
+# set MySQL pass.
+mysql_root_pass: "change_me"
+mysql_repl_pass: "change_me"
+
+# MySQL Password Hashes.
+mysql_root_hash: 'add_me'
+mysql_repl_hash: 'add_me'
+dba_user_hash: 'change_me'
+
+# Server ips
+main: "10.8.0.38"
+replica: "10.8.0.39"
+
+#main: "{% if 'main' in group_names -%} {% set j2l3 = ansible_all_ipv4_addresses | select('match', '^(10.8)') | list %} {% print(j2l3)  %}{%- endif %}"
+#replica: "{% if 'replica' in group_names -%} {% set j214 = ansible_all_ipv4_addresses | select('match', '^(10.8)') | list %} {% print(j214) %} {%- endif %}"
+
+#| type_debug = List:
+#main: "{% if 'main' in group_names -%} {{ ansible_all_ipv4_addresses | select('match', '^(10.8)') | list }} {%- endif %}"
+#replica: "{% if 'replica' in group_names -%} {{ ansible_all_ipv4_addresses | select('match', '^(10.8)') | list }} {%- endif %}"
+
+#| type_debug = List:
+#main: "{% if 'main' in group_names -%} {{ ansible_all_ipv4_addresses[1] }} {%- endif %}"
+#replica: "{% if 'replica' in group_names -%} {{ ansible_all_ipv4_addresses[0] }} {%- endif %}"
+
+
+
+
+
+# Subnets
+#host_subnet: "192.168.50.%"
+#host_sub_root: "10.x.x.x"
+host_subnet: "10.%"
+host_subnet2: "localhost"
+open_host: "%"
+
+# sudirectories and constaints
+dat_dir: "/var/percona/mysql/mysql-data"
+sub_dir: "/var/percona/mysql"
+backup_dir: "/var/percona"
+package_dir: "/var/percona/packages_depends"
+my_dot: "/etc/my.cnf"
+p_dot: "/etc/percona-server.conf.d/mysqld.cnf"
+s_dot: "/etc/percona-server.conf.d/mysqld_safe.cnf"
+u_dot: "/usr/lib/systemd/system/mysqld.service"

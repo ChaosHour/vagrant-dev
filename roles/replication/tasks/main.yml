@@ -1,0 +1,83 @@
+---
+#
+# replication.yml -  Playbook Used to setup MySQL replication on replica to main server.
+#
+
+      - name: Stop MySQL
+        systemd:
+          name: mysql
+          state: stopped
+        ignore_errors: yes
+ 
+
+      - name: Get the main replication status from main
+        mysql_replication: 
+          mode: getmaster 
+          login_user: root 
+          login_password: "{{ mysql_root_pass }}"
+          login_unix_socket: /tmp/mysql.sock
+        delegate_to: "{{ main }}"
+        register: repl_stat
+
+
+      - debug: var=repl_stat
+
+
+      - name: Remove auto.cnf from mysql data_dir on replica
+        file: 
+          path: "{{ dat_dir }}/auto.cnf" 
+          state: absent
+
+      - name: Start MySQL
+        systemd:
+          name: mysql
+          state: started
+        ignore_errors: yes
+
+      - name: wait for MySQL before proceeding on replica
+        wait_for: 
+          port: 3306 
+          host: "{{ ansible_hostname }}"
+
+      - name: Stop Replication
+        mysql_replication: 
+          mode: stopslave 
+          login_user: root 
+          login_password: "{{ mysql_root_pass }}"
+          login_unix_socket: /tmp/mysql.sock
+
+
+      - name: Change master to start replication on replica
+        mysql_replication: 
+          mode: changemaster 
+          master_host: "{{ main }}" 
+          master_user: repl 
+          master_password: "{{ mysql_repl_pass }}" 
+          master_log_file: "{{ repl_stat.File }}" 
+          master_log_pos: "{{ repl_stat.Position }}" 
+          login_user: root 
+          login_password: "{{ mysql_root_pass }}"
+          login_unix_socket: /tmp/mysql.sock
+        ignore_errors: yes
+
+
+      - name: Start Replication on replica
+        mysql_replication: 
+          mode: startslave 
+          login_user: root 
+          login_password: "{{ mysql_root_pass }}"
+          login_unix_socket: /tmp/mysql.sock 
+
+      - name: Check replication
+        mysql_replication: 
+          mode: getslave 
+          login_port: 3306 
+          login_user: root 
+          login_password: "{{ mysql_root_pass }}"
+          login_unix_socket: /tmp/mysql.sock
+        register: repl_stat2
+        when: "'replica' in group_names"
+
+      - debug:  
+         var: (repl_stat2.Master_Host,repl_stat2.Master_Log_File,repl_stat2.Read_Master_Log_Pos)
+        when: "'replica' in group_names"

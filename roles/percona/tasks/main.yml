@@ -1,0 +1,125 @@
+---
+#
+# main.yml - Playbook to add repo's and install Percona server, and setup dirs.
+#
+
+  - include_tasks: pre-install.yml
+    tags: g2
+
+  - name: Install MySQL Python Connecter
+    yum:
+      name: "{{ item }}"
+    with_items:
+        - MySQL-python
+
+     
+
+  - name:  Build and Copy percona dot cnf
+    template:
+      src: templates/percona.cnf.j2
+      dest: "{{ p_dot }}"
+      owner: mysql
+      group: mysql
+      mode: 0644
+    tags: b1
+
+  - name:  Build and Copy mysql_safe dot cnf
+    template:
+      src: templates/mysql_safe.j2
+      dest: "{{ s_dot }}"
+      owner: mysql
+      group: mysql
+      mode: 0644
+    tags: b1
+
+  - name:  Build and Copy my dot cnf
+    template:
+      src: templates/my.cnf.j2
+      dest: "{{ my_dot }}"
+      owner: mysql
+      group: mysql
+      mode: 0644
+    tags: b1
+
+  - name:  Build and Copy mysqld dot service
+    template:
+      src: templates/mysql_service.j2
+      dest: "{{ u_dot }}"
+      owner: mysql
+      group: mysql
+      mode: 0644
+    tags: b1
+
+  - name: Reload systemctl daemon
+    systemd:
+       daemon_reload: yes  
+
+  - name: Reload service sshd
+    systemd:
+      name: sshd
+      state: reloaded     
+
+  - name:  Make the MySQL DB directory
+    file:
+      name: "{{ sub_dir }}"
+      owner: mysql
+      group: mysql
+      mode: 0751
+      state: directory
+
+
+  - name: Make the subdirectories under /var/percona
+    file:
+      name: "{{ sub_dir }}/{{ item }}"
+      owner: mysql
+      group: mysql
+      mode: 0750
+      state: directory
+    with_items:
+      - tmp
+      - mysql-data
+    tags: d2
+
+
+
+  - name: Install the DB once only by checking for the exisance of the ibdata1  file
+    command:
+      mysqld --initialize --user=mysql --datadir="{{ dat_dir }}"
+    args:
+       creates: "{{ dat_dir }}/ibdata1"
+  
+  - name: copy .my.cnf file with root password credentials
+    template:
+      src: templates/.my.cnf.j2
+      dest: /root/.my.cnf
+      owner: root
+      mode: 0600
+    notify:
+      - Start MySQL     
+  - meta: flush_handlers
+
+  - name: read password from mysqld.log
+    shell: grep "temporary password" /var/percona/mysql/mysql.err | tail -1 | awk '{print $NF}'
+    register:  mysql_root_pass2
+    tags: g1
+        
+
+  - debug:
+       var: mysql_root_pass2.stdout
+    tags: g2
+    
+
+  - name: change the root password
+    command: >
+       mysql -u root -p"{{ mysql_root_pass2.stdout }}" --connect-expired-password -e 'ALTER USER 'root'@'localhost' IDENTIFIED WITH mysql_native_password BY "{{ mysql_root_pass }}"'
+    tags: p1
+    
+      
+  - name: enable mysql on startup
+    systemd:
+      name: mysql
+      enabled: yes
+
+#  - meta: flush_handlers
+  - include_tasks: post-install.yml 
+    tags: g3

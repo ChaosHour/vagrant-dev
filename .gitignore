@@ -1,0 +1,48 @@
+*Vagrantfile*
+.terraform
+terraform.tfstate
+*.tfstate*
+terraform.tfvars
+.vars
+.vagrant
+.terraform
+*grpn-fkalamidas-id_rsa.pub*
+*.DS_Store*
+
+# Installer logs
+pip-log.txt
+ansible.log
+build.retry
+
+# Ansible
+*.retry
+
+# Local inventory files
+/inventory/*.local
+
+# Local directories
+/*.local/
+/.vagrant/
+
+# Local password files
+*.pass
+*.password
+*.password_file
+/vars/vault_pass.txt
+
+# C extensions
+*.so
+
+# Mac garbage
+.DS_Store
+
+# Ansible retry
+*.retry
+
+# Backup garbage
+*~
+*.bak
+*.swp
+\#*\#
+\.\#*
+

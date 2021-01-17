@@ -1,0 +1,19 @@
+---
+#
+# main.yml - handlers  to start, stop, and restart services.
+#
+
+
+
+
+  
+
+  - name: Start MySQL
+    systemd:
+      name: mysql
+      state: started
+  
+  - name: Stop MySQL
+    systemd:
+      name: mysql
+      state: stopped  

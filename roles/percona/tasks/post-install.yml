@@ -1,0 +1,40 @@
+---
+#
+# post-install.yml - Playbook to add some things after the installs have completed.
+#
+
+- name: Copy secure.sql
+  copy:
+    src: files/secure.sql
+    dest: /tmp/secure.sql
+    owner: mysql
+    group: mysql
+    mode: 0644
+
+- name: Load secure.sql
+  command:
+    /usr/bin/mysql -u root -e "source /tmp/secure.sql"
+
+- name: Remove secure.sql
+  file:
+    path: /tmp/secure.sql
+    state: absent
+
+- include_tasks: usermaint.yml
+  tags: u1
+  
+- name: Copy lagwaiter2.pm 
+  copy:
+    src: files/percona_lagwaiter2.pm
+    dest: /usr/local/lib/percona_lagwaiter2.pm
+    owner: mysql
+    group: mysql
+    mode: 0755
+
+- name: Create backup dir under /var/percona 
+  file:
+    name: "{{ backup_dir }}/backup"
+    owner: root
+    group: root
+    mode: 0750
+    state: directory

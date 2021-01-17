@@ -1,0 +1,44 @@
+---
+#
+# usermaint.yml - Playbook for system-level users
+#
+
+  - name: Create Grants for root localhost only
+    mysql_user:
+      name: root
+      password: "{{ mysql_root_pass }}"
+      host: "{{ item }}"
+      login_user: root
+      login_password: "{{ mysql_root_pass }}"
+      login_unix_socket: /tmp/mysql.sock
+      state: present
+    with_items: 
+       - "{{ host_subnet }}"
+       - 127.0.0.1
+    tags: user
+
+  - name: Create Replication User
+    mysql_user:
+      name: repl
+      password: "{{ mysql_repl_hash }}"
+      encrypted: yes
+      priv: "*.*:REPLICATION CLIENT,REPLICATION SLAVE"
+      host: "{{ host_subnet }}"
+      login_user: root
+      login_password: "{{ mysql_root_pass }}"
+      login_unix_socket: /tmp/mysql.sock
+      state: present
+    tags: user
+
+  - name: Create dba_user
+    mysql_user:
+      name: dba_util
+      password: "{{ dba_user_hash }}"
+      encrypted: yes
+      priv: "*.*:ALL"
+      host: "{{ open_host }}"
+      login_user: root
+      login_password: "{{ mysql_root_pass }}"
+      login_unix_socket: /tmp/mysql.sock
+      state: present
+    tags: user
