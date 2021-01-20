@@ -75,7 +75,7 @@ sub get_slave_lag {
 
          # we return oktorun and the lag
          return $lag_ret;
-## 3 lines Added by Ammon 2017-04-03
+## 3 lines Added by Person 2017-04-03
       }else{
          my $lag_ret = 0 - 1;
          return $lag_ret;

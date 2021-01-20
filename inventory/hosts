@@ -1,12 +1,12 @@
 [vagrant_dev]
-dev1 ansible_host=10.8.0.38 
-dev2 ansible_host=10.8.0.39
+dev1 ansible_host=add_ip 
+dev2 ansible_host=add_ip
 
 [main]
-dev1 ansible_host=10.8.0.38
+dev1 ansible_host=add_ip
 
 [replica]
-dev2 ansible_host=10.8.0.39
+dev2 ansible_host=add_ip
 
 
 [vagrant_dev:children]

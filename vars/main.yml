@@ -17,22 +17,8 @@ mysql_repl_hash: 'add_me'
 dba_user_hash: 'change_me'
 
 # Server ips
-main: "10.8.0.38"
-replica: "10.8.0.39"
-
-#main: "{% if 'main' in group_names -%} {% set j2l3 = ansible_all_ipv4_addresses | select('match', '^(10.8)') | list %} {% print(j2l3)  %}{%- endif %}"
-#replica: "{% if 'replica' in group_names -%} {% set j214 = ansible_all_ipv4_addresses | select('match', '^(10.8)') | list %} {% print(j214) %} {%- endif %}"
-
-#| type_debug = List:
-#main: "{% if 'main' in group_names -%} {{ ansible_all_ipv4_addresses | select('match', '^(10.8)') | list }} {%- endif %}"
-#replica: "{% if 'replica' in group_names -%} {{ ansible_all_ipv4_addresses | select('match', '^(10.8)') | list }} {%- endif %}"
-
-#| type_debug = List:
-#main: "{% if 'main' in group_names -%} {{ ansible_all_ipv4_addresses[1] }} {%- endif %}"
-#replica: "{% if 'replica' in group_names -%} {{ ansible_all_ipv4_addresses[0] }} {%- endif %}"
-
-
-
+main: "add_ip"
+replica: "add_ip"
 
 
 # Subnets

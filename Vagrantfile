@@ -26,12 +26,12 @@ Vagrant.configure("2") do |config|
 
     config.vm.define "dev1" do |dev1|
       dev1.vm.hostname = "dev1"
-      dev1.vm.network :public_network, :ip => "10.8.0.38", :mac => "add_me", :bridge => "en8: USB 10/100/1000 LAN", :use_dhcp_assigned_default_route => true
+      dev1.vm.network :public_network, :ip => "add_ip", :mac => "add_me", :bridge => "en8: USB 10/100/1000 LAN", :use_dhcp_assigned_default_route => true
   end
 
     config.vm.define "dev2" do |dev2|
       dev2.vm.hostname = "dev2"
-      dev2.vm.network :public_network, :ip => "10.8.0.39", :mac => "add_me", :bridge => "en8: USB 10/100/1000 LAN", :use_dhcp_assigned_default_route => true
+      dev2.vm.network :public_network, :ip => "add_ip", :mac => "add_me", :bridge => "en8: USB 10/100/1000 LAN", :use_dhcp_assigned_default_route => true
   end
 
 
